@@ -12,12 +12,16 @@ const app = express();
 
 app.use(cors());
 
+// API to listen to clerkwebhook
+app.post(
+  "/api/clerk",
+  express.raw({ type: "application/json" }),
+  clerkWebhooks,
+);
+
 // Midleware
 app.use(express.json());
 app.use(clerkMiddleware());
-
-// API to listen to clerkwebhook
-app.use("api/clerk", clerkWebhooks);
 
 app.get("/", (_req: Request, res: Response) => {
   res.send("Hello");

@@ -26,13 +26,15 @@ const clerkWebhooks = async (req: Request, res: Response) => {
     };
 
     // IMPORTANT: must be raw string body for Svix
-    const payload = JSON.stringify(req.body);
+    const payload = req.body.stringify();
 
     const event = whook.verify(payload, headers) as ClerkEvent;
 
+    const parsedEvent = JSON.parse(payload) as ClerkEvent;
+
     console.log("Verified event:", event);
 
-    const { data } = event;
+    const { data } = parsedEvent;
 
     const userData: IUser = {
       _id: data.id,
@@ -43,7 +45,7 @@ const clerkWebhooks = async (req: Request, res: Response) => {
       recentSearchedCities: [],
     };
 
-    switch (event.type) {
+    switch (parsedEvent.type) {
       case "user.created":
         await User.create(userData);
         break;
@@ -68,3 +70,8 @@ const clerkWebhooks = async (req: Request, res: Response) => {
 };
 
 export default clerkWebhooks;
+
+// wife be submissive, husband love your love your wife, if you are not submissive where the love wan come from
+// Run away from princess. I dey always run away from princess
+// Any woman that cannot support you when you are down should'nt be in your life
+// any brain wey no fit support your vision delete am
