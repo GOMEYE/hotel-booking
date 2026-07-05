@@ -3,7 +3,7 @@ import { clerkMiddleware } from "@clerk/express";
 import "dotenv/config";
 import cors from "cors";
 
-import connectDB from "./src/db.ts";
+import connectDB from "./src/db.js";
 import clerkWebhooks from "./src/controllers/ClerkWebhook.js";
 
 connectDB();
