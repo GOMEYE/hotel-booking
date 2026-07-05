@@ -4,7 +4,7 @@ import "dotenv/config";
 import cors from "cors";
 
 import connectDB from "./src/db.ts";
-import clerkWebhooks from "./src/controllers/ClerkWebhook.ts";
+import clerkWebhooks from "./src/controllers/ClerkWebhook.js";
 
 connectDB();
 
