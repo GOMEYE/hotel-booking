@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import { clerkMiddleware } from "@clerk/express";
 import "dotenv/config";
 import cors from "cors";
