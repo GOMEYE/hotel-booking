@@ -25,8 +25,8 @@ const clerkWebhooks = async (req: Request, res: Response) => {
       "svix-signature": req.headers["svix-signature"] as string,
     };
 
-    // IMPORTANT: must be raw string body for Svix
-    const payload = req.body.stringify();
+    // req.body is a raw Buffer (thanks to express.raw()) — convert to string
+    const payload = req.body.toString();
 
     const event = whook.verify(payload, headers) as ClerkEvent;
 
@@ -70,8 +70,3 @@ const clerkWebhooks = async (req: Request, res: Response) => {
 };
 
 export default clerkWebhooks;
-
-// wife be submissive, husband love your love your wife, if you are not submissive where the love wan come from
-// Run away from princess. I dey always run away from princess
-// Any woman that cannot support you when you are down should'nt be in your life
-// any brain wey no fit support your vision delete am
