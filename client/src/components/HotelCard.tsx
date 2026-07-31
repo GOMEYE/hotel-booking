@@ -2,7 +2,12 @@ import { Link } from "react-router-dom";
 import type { IRooms } from "../interfaces/rooms.interface";
 import { assets } from "../assets/assets";
 
-const HotelCard = ({ room, index }: IRooms) => {
+interface RoomCardProps {
+  room: IRooms;
+  index: number;
+}
+
+const HotelCard = ({ room, index }: RoomCardProps) => {
   return (
     <Link
       className="relative max-w-70 w-full rounded-xl overflow-clip bg-white text-gray-500/90 shadow-[0px_4px_4px_rgba(0,0,0,0.5)]"

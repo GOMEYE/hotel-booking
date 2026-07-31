@@ -1,24 +1,28 @@
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  facilityIcons,
-  roomCommonData,
-  roomsDummyData,
-} from "../assets/assets";
+import { facilityIcons, roomCommonData } from "../assets/assets";
 import type { IRooms } from "../interfaces/rooms.interface";
 import Star from "../components/Star";
 import type { IRoomCommonData } from "../interfaces/roomCommonData.interface";
+import useAppContext from "../context/useAppContext";
+import toast from "react-hot-toast";
 
 const RoomDetails = () => {
   const { id } = useParams();
 
+  const { rooms, getToken, axios, navigate } = useAppContext();
+  const [checkInDate, setCheckInDate] = useState("");
+  const [checkOutDate, setCheckOutDate] = useState("");
+  const [guests, setGuests] = useState<number>(1);
+  const [mainImage, setMainImage] = useState<string | undefined>(undefined);
+
+  const [isAvailable, setIsAvailable] = useState(false);
+
   // Derived synchronously during render — no effect needed
   const room = useMemo<IRooms | undefined>(
-    () => (roomsDummyData as IRooms[]).find((room) => room._id === id),
-    [id],
+    () => (rooms as IRooms[]).find((room) => room._id === id),
+    [id, rooms],
   );
-
-  const [mainImage, setMainImage] = useState<string | undefined>(undefined);
 
   const selectedImage = mainImage ?? room?.images[0];
 
@@ -26,166 +30,251 @@ const RoomDetails = () => {
     return <div>Room not found</div>;
   }
 
+  // Function to check availability of room
+  const checkAvailabilty = async () => {
+    try {
+      if (checkInDate >= checkOutDate) {
+        toast.error("Check-in date should be less than check-out date");
+        return;
+      }
+      const { data } = await axios.post("/api/bookings/check-availability", {
+        room: id,
+        checkInDate,
+        checkOutDate,
+      });
+      if (data.success) {
+        if (data.isAvailable) {
+          setIsAvailable(true);
+          toast.success("Room is available");
+        } else {
+          setIsAvailable(false);
+          toast.error("Room is not available");
+        }
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    }
+  };
+
+  // onSubmitHandler function to check availabilty & book room
+  const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+      const token = await getToken();
+      if (!isAvailable) {
+        return checkAvailabilty();
+      } else {
+        const { data } = await axios.post(
+          "/api/bookings/book",
+          {
+            room: id,
+            checkInDate,
+            checkOutDate,
+            guests,
+            paymentMethod: "Pay At Hotel",
+          },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (data.success) {
+          toast.success(data.message);
+          navigate("/my-bookings");
+          scroll(0, 0);
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong, please try again");
+      }
+    }
+  };
+
   return (
-    <div className="py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32">
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
-        <h1 className="text-3xl md:text-4xl font-playfair">
-          {room.hotel.name}{" "}
-          <span className="font-inter text-sm">{room.roomType}</span>
-        </h1>
-        <p className="text-xs font-inter py-1.5 px-3 text-white bg-orange-500 rounded-full">
-          20% OFF
-        </p>
-      </div>
-
-      <div className="flex items-center gap-1 mt-2">
-        <Star />
-        <p className="ml-2">200+ reviews</p>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6 mt-6">
-        <div className="lg:w-1/2 w-full">
-          <img
-            src={selectedImage}
-            alt="Room Image"
-            className="w-full rounded-xl shadow-lg object-cover"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4 lg:w-1/2 w-full">
-          {room?.images.length > 1 &&
-            room.images.map((image, index) => (
-              <img
-                onClick={() => setMainImage(image)}
-                src={image}
-                key={index}
-                alt="Room image"
-                className={`w-full rounded-xl shadow-md object-cover cursor-pointer ${selectedImage === image && "outline-3 outline-orange-500"}`}
-              />
-            ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row md:justify-between mt-10">
-        <div className="flex flex-col">
+    room && (
+      <div className="py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
           <h1 className="text-3xl md:text-4xl font-playfair">
-            Experience Luxury like Never Before
+            {room.hotel.name}{" "}
+            <span className="font-inter text-sm">{room.roomType}</span>
           </h1>
-          <div className="flex flex-wrap items-center mt-3 mb-6 gap-4">
-            {room.amenities.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100"
-              >
-                <img src={facilityIcons[item]} alt={item} className="w-5 h-5" />
-                <p className="text-xs">{item}</p>
-              </div>
-            ))}
-          </div>
+          <p className="text-xs font-inter py-1.5 px-3 text-white bg-orange-500 rounded-full">
+            20% OFF
+          </p>
         </div>
-        <p className="text-2xl font-medium">${room.pricePerNight}/night</p>
-      </div>
 
-      <form
-        action=""
-        className="flex flex-col md:flex-row items-start md:items-center justify-between bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded mx-auto mt-16 max-w-6xl"
-      >
-        <div className="flex flex-col flex-wrap md:flex-row items-start md:items-center gap-4 md:gap-10 text-gray-500">
-          <div className="flex flex-col">
-            <label htmlFor="checkInDate" className="font-medium">
-              Check-In
-            </label>
-            <input
-              type="date"
-              id="checkInDate"
-              placeholder="Check-In"
-              className="w-full rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none focus:border-blue-500"
-              required
+        <div className="flex items-center gap-1 mt-2">
+          <Star />
+          <p className="ml-2">200+ reviews</p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6 mt-6">
+          <div className="lg:w-1/2 w-full">
+            <img
+              src={selectedImage}
+              alt="Room Image"
+              className="w-full rounded-xl shadow-lg object-cover"
             />
           </div>
-
-          <div className="w-px h-15 bg-gray-300/70 max-md:hidden"></div>
-
-          <div className="flex flex-col">
-            <label htmlFor="checkOutDate" className="font-medium">
-              Check-Out
-            </label>
-            <input
-              type="date"
-              id="checkOutDate"
-              placeholder="Check-Out"
-              className="w-full rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none focus:border-blue-500"
-              required
-            />
-          </div>
-
-          <div className="w-px h-15 bg-gray-300/70 max-md:hidden"></div>
-
-          <div className="flex flex-col">
-            <label htmlFor="guests" className="font-medium">
-              Guests
-            </label>
-            <input
-              type="number"
-              id="guests"
-              placeholder="1"
-              min="1"
-              className="w-20 rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none focus:border-blue-500"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4 lg:w-1/2 w-full">
+            {room?.images.length > 1 &&
+              room.images.map((image, index) => (
+                <img
+                  onClick={() => setMainImage(image)}
+                  src={image}
+                  key={index}
+                  alt="Room image"
+                  className={`w-full rounded-xl shadow-md object-cover cursor-pointer ${selectedImage === image && "outline-3 outline-orange-500"}`}
+                />
+              ))}
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="bg-primary hover:bg-primary-dull active:scale-95 transition-all text-white rounded-md max-md:w-full max-md:mt-6 md:px-25 py-3 md:py-4 text-base cursor-pointer"
+        <div className="flex flex-col md:flex-row md:justify-between mt-10">
+          <div className="flex flex-col">
+            <h1 className="text-3xl md:text-4xl font-playfair">
+              Experience Luxury like Never Before
+            </h1>
+            <div className="flex flex-wrap items-center mt-3 mb-6 gap-4">
+              {room.amenities.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100"
+                >
+                  <img
+                    src={facilityIcons[item]}
+                    alt={item}
+                    className="w-5 h-5"
+                  />
+                  <p className="text-xs">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <p className="text-2xl font-medium">${room.pricePerNight}/night</p>
+        </div>
+
+        <form
+          onSubmit={onSubmitHandler}
+          className="flex flex-col md:flex-row items-start md:items-center justify-between bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded mx-auto mt-16 max-w-6xl"
         >
-          Check Availability
-        </button>
-      </form>
+          <div className="flex flex-col flex-wrap md:flex-row items-start md:items-center gap-4 md:gap-10 text-gray-500">
+            <div className="flex flex-col">
+              <label htmlFor="checkInDate" className="font-medium">
+                Check-In
+              </label>
+              <input
+                onChange={(e) => setCheckInDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                type="date"
+                id="checkInDate"
+                placeholder="Check-In"
+                className="w-full rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none focus:border-blue-500"
+                required
+              />
+            </div>
 
-      <div className="mt-25 space-y-4">
-        {roomCommonData.map((spec: IRoomCommonData, index) => (
-          <div key={index} className="flex items-start gap-2">
-            <img src={spec.icon} alt={`${spec.title}-icon`} className="w-6.5" />
-            <div>
-              <p className="text-base">{spec.title}</p>
-              <p className="text-gray-500">{spec.description}</p>
+            <div className="w-px h-15 bg-gray-300/70 max-md:hidden"></div>
+
+            <div className="flex flex-col">
+              <label htmlFor="checkOutDate" className="font-medium">
+                Check-Out
+              </label>
+              <input
+                onChange={(e) => setCheckOutDate(e.target.value)}
+                min={checkInDate}
+                disabled={!checkInDate}
+                type="date"
+                id="checkOutDate"
+                placeholder="Check-Out"
+                className="w-full rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none focus:border-blue-500"
+                required
+              />
+            </div>
+
+            <div className="w-px h-15 bg-gray-300/70 max-md:hidden"></div>
+
+            <div className="flex flex-col">
+              <label htmlFor="guests" className="font-medium">
+                Guests
+              </label>
+              <input
+                onChange={(e) => setGuests(Number(e.target.value))}
+                value={guests}
+                type="number"
+                id="guests"
+                placeholder="1"
+                min="1"
+                className="w-20 rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none focus:border-blue-500"
+                required
+              />
             </div>
           </div>
-        ))}
-      </div>
 
-      <div className="max-w-3xl border-y border-gray-300 my-15 py-10 text-gray-500">
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur,
-          unde. Id quas maxime ex reiciendis, consectetur tenetur nulla illum
-          tempore, facilis inventore repudiandae sequi rem obcaecati quaerat
-          numquam, nostrum blanditiis quis quia nihil excepturi hic minus
-          doloribus earum. Optio deleniti ex obcaecati dicta quaerat rem.
-          Inventore eaque earum quaerat aperiam?
-        </p>
-      </div>
+          <button
+            type="submit"
+            className="bg-primary hover:bg-primary-dull active:scale-95 transition-all text-white rounded-md max-md:w-full max-md:mt-6 md:px-25 py-3 md:py-4 text-base cursor-pointer"
+          >
+            {isAvailable ? "Book now" : "Check Availability"}
+          </button>
+        </form>
 
-      <div className="flex flex-col items-start gap-4">
-        <div className="flex gap-4">
-          <img
-            src={room.hotel.owner.image}
-            alt="Host"
-            className="h-14 w-14 md:h-18 md:w-18 rounded-full"
-          />
-          <div>
-            <p className="text-lg md:text-xl">Hosted BY {room.hotel.name}</p>
-            <div className="flex items-center mt-1">
-              <Star />
-              <p className="ml-2">200+ reviews</p>
+        <div className="mt-25 space-y-4">
+          {roomCommonData.map((spec: IRoomCommonData, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <img
+                src={spec.icon}
+                alt={`${spec.title}-icon`}
+                className="w-6.5"
+              />
+              <div>
+                <p className="text-base">{spec.title}</p>
+                <p className="text-gray-500">{spec.description}</p>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-        <button className="px-6 py-2.5 mt-4 rounded text-white bg-primary hover:bg-primary-dull transition-all cursor-pointer">
-          Contact Now
-        </button>
+
+        <div className="max-w-3xl border-y border-gray-300 my-15 py-10 text-gray-500">
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Consequatur, unde. Id quas maxime ex reiciendis, consectetur tenetur
+            nulla illum tempore, facilis inventore repudiandae sequi rem
+            obcaecati quaerat numquam, nostrum blanditiis quis quia nihil
+            excepturi hic minus doloribus earum. Optio deleniti ex obcaecati
+            dicta quaerat rem. Inventore eaque earum quaerat aperiam?
+          </p>
+        </div>
+
+        <div className="flex flex-col items-start gap-4">
+          <div className="flex gap-4">
+            <img
+              src={room.hotel.owner.image}
+              alt="Host"
+              className="h-14 w-14 md:h-18 md:w-18 rounded-full"
+            />
+            <div>
+              <p className="text-lg md:text-xl">Hosted BY {room.hotel.name}</p>
+              <div className="flex items-center mt-1">
+                <Star />
+                <p className="ml-2">200+ reviews</p>
+              </div>
+            </div>
+          </div>
+          <button className="px-6 py-2.5 mt-4 rounded text-white bg-primary hover:bg-primary-dull transition-all cursor-pointer">
+            Contact Now
+          </button>
+        </div>
       </div>
-    </div>
+    )
   );
 };
 

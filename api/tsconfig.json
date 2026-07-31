@@ -11,7 +11,7 @@
     "target": "esnext",
     // For nodejs:
     // "lib": ["esnext"],
-    "types": ["node"],
+    "types": ["node", "@clerk/express"],
     // and npm install -D @types/node
 
     // Other Outputs
@@ -42,6 +42,6 @@
     "allowImportingTsExtensions": true,
     "skipLibCheck": true
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

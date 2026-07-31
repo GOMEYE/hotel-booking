@@ -1,13 +1,5 @@
-import mongoose, { Schema } from "mongoose";
-
-export interface IUser {
-  _id: string;
-  username: string;
-  email: string;
-  image: string;
-  role: "user" | "hotelOwner";
-  recentSearchedCities: string[];
-}
+import mongoose, { Schema, Types } from "mongoose";
+import type { IUser } from "../types/user.interface.ts";
 
 const userSchema = new Schema<IUser>(
   {

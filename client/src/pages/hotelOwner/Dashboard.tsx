@@ -1,11 +1,42 @@
-import { useState } from "react";
-import { assets, dashboardDummyData } from "../../assets/assets";
+import { useCallback, useEffect, useState } from "react";
+import { assets } from "../../assets/assets";
 import Title from "../../components/Title";
 import type { IDashboardData } from "../../interfaces/dashboardData.interface";
+import useAppContext from "../../context/useAppContext";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
-  const [dashboardData, setDashboardData] =
-    useState<IDashboardData>(dashboardDummyData);
+  const [dashboardData, setDashboardData] = useState<IDashboardData>();
+  const { axios, getToken, user, currency } = useAppContext();
+
+  const fetchDashboardData = useCallback(async () => {
+    const token = await getToken();
+    const { data } = await axios.get("/api/booking/hotel", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    console.log(data);
+
+    if (data.success) {
+      setDashboardData(data.dashboardData);
+      // console.log(data.dashboardData);
+    } else {
+      toast.error(data.message);
+    }
+  }, [axios, getToken]);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadDatchboardData = async () => {
+      await fetchDashboardData();
+    };
+    loadDatchboardData();
+  }, [fetchDashboardData, user]);
+
+  if (!dashboardData) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <div>
       <Title
@@ -39,6 +70,7 @@ const Dashboard = () => {
           <div className="flex flex-col sm:ml-4 font-medium">
             <p className="text-blue-500 text-lg">Total Revenue</p>
             <p className="text-neutral-400 text-base">
+              {currency}
               {dashboardData.totalRevenue}
             </p>
           </div>
@@ -75,7 +107,7 @@ const Dashboard = () => {
                   {item.room.roomType}
                 </td>
                 <td className="py-3 px-4 text-gray-700 boder-t border-gray-300 text-center">
-                  ${item.totalPrice}
+                  {currency} {item.totalPrice}
                 </td>
                 <td className="py-3 px-4 boder-t border-gray-300 text-center">
                   <button

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { assets } from "../assets/assets.ts";
-import { useClerk, useUser, UserButton } from "@clerk/react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useClerk, UserButton } from "@clerk/react";
+import { useLocation } from "react-router-dom";
+import useAppContext from "../context/useAppContext.tsx";
 
 const BookIcon = () => (
   <svg
@@ -32,9 +33,9 @@ const Navbar = () => {
   ];
 
   const { openSignIn } = useClerk();
-  const { user } = useUser();
-  const navigate = useNavigate();
   const location = useLocation();
+
+  const { user, navigate, isOwner, setShowHotelReg } = useAppContext();
 
   const isHomepage = location.pathname === "/";
 
@@ -79,12 +80,16 @@ const Navbar = () => {
             />
           </a>
         ))}
-        <button
-          onClick={() => navigate("/owner")}
-          className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${isScrolled ? "text-black" : "text-white"} transition-all`}
-        >
-          Dashboard
-        </button>
+        {user && (
+          <button
+            onClick={() =>
+              isOwner ? navigate("/owner") : setShowHotelReg(true)
+            }
+            className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${isScrolled ? "text-black" : "text-white"} transition-all`}
+          >
+            {isOwner ? "Dashboard" : "List Your Hotel"}
+          </button>
+        )}
       </div>
 
       {/* Desktop Right */}
@@ -156,10 +161,12 @@ const Navbar = () => {
 
         {user && (
           <button
-            onClick={() => navigate("/owner")}
+            onClick={() =>
+              isOwner ? navigate("/owner") : setShowHotelReg(true)
+            }
             className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
           >
-            Dashboard
+            {isOwner ? "Dashboard" : "List Your Hotel"}
           </button>
         )}
 

@@ -2,12 +2,8 @@ import type { Request, Response } from "express";
 import { Webhook } from "svix";
 
 import User from "../models/User.js";
-import type { IUser } from "../models/User.js";
-
-type ClerkEvent = {
-  type: string;
-  data: any;
-};
+import type { IUser } from "../types/user.interface.ts";
+import type { ClerkEvent } from "../types/clerkEvent.type.ts";
 
 const clerkWebhooks = async (req: Request, res: Response) => {
   try {
@@ -32,30 +28,40 @@ const clerkWebhooks = async (req: Request, res: Response) => {
 
     const parsedEvent = JSON.parse(payload) as ClerkEvent;
 
-    console.log("Verified event:", event);
+    // console.log("Verified event:", event);
 
     const { data } = parsedEvent;
 
-    const userData: IUser = {
-      _id: data.id,
-      email: data.email_addresses?.[0]?.email_address,
-      username: `${data.first_name ?? ""} ${data.last_name ?? ""}`.trim(),
-      image: data.image_url,
-      role: "user",
-      recentSearchedCities: [],
-    };
-
     switch (parsedEvent.type) {
-      case "user.created":
+      case "user.created": {
+        const userData: IUser = {
+          _id: data.id,
+          email: data.email_addresses?.[0]?.email_address,
+          username: `${data.first_name ?? ""} ${data.last_name ?? ""}`.trim(),
+          image: data.image_url,
+          role: "user",
+          recentSearchedCities: [],
+        };
+        // console.log("Created Mongo user:", createdUser);
         await User.create(userData);
         break;
+      }
 
-      case "user.updated":
+      case "user.updated": {
+        const userData: IUser = {
+          _id: data.id,
+          email: data.email_addresses?.[0]?.email_address,
+          username: `${data.first_name ?? ""} ${data.last_name ?? ""}`.trim(),
+          image: data.image_url,
+          role: "user",
+          recentSearchedCities: [],
+        };
         await User.findByIdAndUpdate(data.id, userData, {
           new: true,
           upsert: true,
         });
         break;
+      }
 
       case "user.deleted":
         await User.findByIdAndDelete(data.id);
@@ -64,7 +70,7 @@ const clerkWebhooks = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error("Webhook error:", error);
+    // console.error("Webhook error:", error);
     return res.status(400).json({ message: "Webhook verification failed" });
   }
 };

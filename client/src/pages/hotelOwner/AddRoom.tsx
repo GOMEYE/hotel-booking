@@ -1,8 +1,12 @@
 import { useState } from "react";
 import Title from "../../components/Title";
 import { assets } from "../../assets/assets";
+import useAppContext from "../../context/useAppContext";
+import toast from "react-hot-toast";
 
 const AddRoom = () => {
+  const { getToken, axios } = useAppContext();
+
   const [images, setImages] = useState<Record<string, File | null>>({
     "1": null,
     "2": null,
@@ -22,14 +26,83 @@ const AddRoom = () => {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ inputs, images });
+
+    if (
+      !inputs.roomType ||
+      !inputs.pricePerNight ||
+      // !inputs.amenities ||
+      Object.values(images).every((image) => image === null)
+    ) {
+      toast.error("Please fill in all the details");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("roomType", inputs.roomType);
+      formData.append("pricePerNight", inputs.pricePerNight.toString());
+
+      // Converting amenities to array and keeping only enabled amenities
+      const amenities = (
+        Object.keys(inputs.amenities) as Array<keyof typeof inputs.amenities>
+      ).filter((key) => inputs.amenities[key]);
+      formData.append("amenities", JSON.stringify(amenities));
+
+      // Adding images
+      (Object.keys(images) as Array<keyof typeof images>).forEach((key) => {
+        const image = images[key];
+
+        if (image) {
+          formData.append("images", image);
+        }
+      });
+
+      const token = await getToken();
+      console.log(token);
+
+      const { data } = await axios.post("/api/rooms", formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log(data);
+
+      if (data.success) {
+        toast.success(data.message);
+        setInputs({
+          roomType: "",
+          pricePerNight: 0,
+          amenities: {
+            "Free Wifi": false,
+            "Free Breakfast": false,
+            "Room Service": false,
+            "Mountain View": false,
+            "Pool Access": false,
+          },
+        });
+        setImages({ 1: null, 2: null, 3: null, 4: null });
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     // FIXED: Added onSubmit handler here
-    <form onSubmit={handleSubmit} className="max-w-4xl pb-12">
+    <form onSubmit={onSubmitHandler} className="max-w-4xl pb-12">
       <Title
         align="left"
         font="outfit"
@@ -137,8 +210,9 @@ const AddRoom = () => {
       <button
         type="submit"
         className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-lg mt-8 font-medium shadow-sm transition-colors cursor-pointer"
+        disabled={isLoading}
       >
-        Add Room
+        {isLoading ? "Adding..." : "Add Room"}
       </button>
     </form>
   );

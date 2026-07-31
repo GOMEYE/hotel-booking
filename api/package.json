@@ -14,12 +14,15 @@
     "express": "^5.2.1",
     "mongoose": "^9.7.3",
     "multer": "^2.2.0",
+    "nodemailer": "^9.0.3",
     "svix": "^1.96.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/multer": "^2.2.0",
     "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.1",
     "tsx": "^4.23.0",
     "typescript": "^5.0.0"
   }

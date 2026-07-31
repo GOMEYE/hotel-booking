@@ -1,12 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Title from "../components/Title";
 import type { IUserBookingData } from "../interfaces/userBookingData.interface";
-import { assets, userBookingsDummyData } from "../assets/assets";
+import { assets } from "../assets/assets";
+import useAppContext from "../context/useAppContext";
+import toast from "react-hot-toast";
 
 const MyBookings = () => {
-  const [bookings, setBookings] = useState<IUserBookingData[]>(
-    userBookingsDummyData,
-  );
+  const { axios, getToken, user } = useAppContext();
+  const [bookings, setBookings] = useState<IUserBookingData[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchUserBooking = async () => {
+      const token = await getToken();
+      try {
+        const { data } = await axios.get("/api/bookings/user", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!isMounted) return;
+
+        if (data.success) {
+          setBookings(data.bookings);
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Something went wrong!");
+        }
+      }
+    };
+    if (user) {
+      fetchUserBooking();
+    }
+
+    return () => {
+      isMounted = false; // Cleanup flag
+    };
+  }, [user, getToken, axios]);
+
   return (
     <div className="py-28 mb:pb-35 md:pt-32 px-4 md:px-16 lg:px-24 xl:px-32">
       <Title
