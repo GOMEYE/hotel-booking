@@ -7,3 +7,4 @@ export interface IHotel {
   city: string;
 }
 
+

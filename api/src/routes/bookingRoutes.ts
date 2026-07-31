@@ -16,3 +16,4 @@ bookingRouter.get("/hotel", protect, getHotelBookings);
 
 export default bookingRouter;
 
+

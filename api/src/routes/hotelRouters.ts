@@ -8,3 +8,4 @@ hotelRouter.post("/", protect, registerHotel);
 
 export default hotelRouter;
 
+

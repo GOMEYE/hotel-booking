@@ -18,3 +18,4 @@ roomRouter.patch("/:roomId/availability", protect, toggleRoomAvailability);
 
 export default roomRouter;
 
+

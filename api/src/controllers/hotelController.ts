@@ -43,3 +43,4 @@ export const registerHotel = async (req: Request, res: Response) => {
   }
 };
 
+

@@ -221,3 +221,4 @@ export const getHotelBookings = async (req: Request, res: Response) => {
   }
 };
 
+

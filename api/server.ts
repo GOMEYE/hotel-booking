@@ -9,7 +9,7 @@ import connectCloudinary from "./src/configs/cloudinary.js";
 import clerkWebhooks from "./src/controllers/ClerkWebhook.js";
 import userRouter from "./src/routes/userRouters.js";
 import hotelRouter from "./src/routes/hotelRouters.js";
-import roomRouter from "./src/routes/roomRoute.ts";
+import roomRouter from "./src/routes/roomRoute.js";
 import bookingRouter from "./src/routes/bookingRoutes.js";
 
 connectDB();
@@ -45,3 +45,4 @@ app.listen(PORT, () => {
 });
 
 export default app;
+
