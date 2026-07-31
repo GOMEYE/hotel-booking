@@ -14,3 +14,4 @@ const hotelSchema = new Schema<IHotel>(
 
 const Hotel = mongoose.model<IHotel>("Hotel", hotelSchema);
 export default Hotel;
+

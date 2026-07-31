@@ -12,3 +12,4 @@ export interface IBooking {
   paymentMethod: string;
   isPaid: boolean;
 }
+

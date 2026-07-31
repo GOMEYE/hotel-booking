@@ -8,3 +8,4 @@ export interface IRoom {
   images: string[];
   isAvailable: boolean;
 }
+

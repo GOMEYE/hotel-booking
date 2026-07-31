@@ -156,3 +156,4 @@ export const toggleRoomAvailability = async (req: Request, res: Response) => {
     });
   }
 };
+

@@ -6,3 +6,4 @@ export interface IUser {
   role: "user" | "hotelOwner";
   recentSearchedCities: string[];
 }
+

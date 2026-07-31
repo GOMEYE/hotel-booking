@@ -11,3 +11,4 @@ userRouter.get("/", protect, getUserData);
 userRouter.post("/store-recent-search", protect, storeRecentSearcedCities);
 
 export default userRouter;
+

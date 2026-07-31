@@ -50,3 +50,4 @@ export const storeRecentSearcedCities = async (req: Request, res: Response) => {
     });
   }
 };
+

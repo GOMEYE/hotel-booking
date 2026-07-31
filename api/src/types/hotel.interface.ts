@@ -6,3 +6,4 @@ export interface IHotel {
   owner: string;
   city: string;
 }
+
