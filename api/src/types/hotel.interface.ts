@@ -1,5 +1,3 @@
-import type { Types } from "mongoose";
-
 export interface IHotel {
   _id: string;
   name: string;

@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import Hotel from "../models/Hotel.ts";
-import User from "../models/User.ts";
+import Hotel from "../models/Hotel.js";
+import User from "../models/User.js";
 
 export const registerHotel = async (req: Request, res: Response) => {
   try {

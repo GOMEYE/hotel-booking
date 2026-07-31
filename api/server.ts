@@ -3,14 +3,14 @@ import { clerkMiddleware } from "@clerk/express";
 import cors from "cors";
 import "dotenv/config";
 
-import connectDB from "./src/configs/db.ts";
-import connectCloudinary from "./src/configs/cloudinary.ts";
+import connectDB from "./src/configs/db.js";
+import connectCloudinary from "./src/configs/cloudinary.js";
 
-import clerkWebhooks from "./src/controllers/ClerkWebhook.ts";
-import userRouter from "./src/routes/userRouters.ts";
-import hotelRouter from "./src/routes/hotelRouters.ts";
+import clerkWebhooks from "./src/controllers/ClerkWebhook.js";
+import userRouter from "./src/routes/userRouters.js";
+import hotelRouter from "./src/routes/hotelRouters.js";
 import roomRouter from "./src/routes/roomRoute.ts";
-import bookingRouter from "./src/routes/bookingRoutes.ts";
+import bookingRouter from "./src/routes/bookingRoutes.js";
 
 connectDB();
 connectCloudinary();

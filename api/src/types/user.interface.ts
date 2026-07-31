@@ -1,5 +1,3 @@
-import type { Types } from "mongoose";
-
 export interface IUser {
   _id: string;
   username: string;

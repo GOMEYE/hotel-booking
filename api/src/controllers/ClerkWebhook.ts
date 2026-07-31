@@ -2,8 +2,8 @@ import type { Request, Response } from "express";
 import { Webhook } from "svix";
 
 import User from "../models/User.js";
-import type { IUser } from "../types/user.interface.ts";
-import type { ClerkEvent } from "../types/clerkEvent.type.ts";
+import type { IUser } from "../types/user.interface.js";
+import type { ClerkEvent } from "../types/clerkEvent.type.js";
 
 const clerkWebhooks = async (req: Request, res: Response) => {
   try {

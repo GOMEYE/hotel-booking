@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
-import Booking from "../models/Booking.ts";
-import Room from "../models/Room.ts";
-import Hotel from "../models/Hotel.ts";
+import Booking from "../models/Booking.js";
+import Room from "../models/Room.js";
+import Hotel from "../models/Hotel.js";
 import { getAuth } from "@clerk/express";
-import { transporter } from "../configs/nodemailer.ts";
+import { transporter } from "../configs/nodemailer.js";
 
 // Function to check availability of room
 // POST api/bookings/check-availability

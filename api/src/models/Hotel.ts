@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import type { IHotel } from "../types/hotel.interface.ts";
+import type { IHotel } from "../types/hotel.interface.js";
 
 const hotelSchema = new Schema<IHotel>(
   {

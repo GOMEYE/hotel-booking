@@ -1,5 +1,4 @@
-import type { Types } from "mongoose";
-import type { IHotel } from "./hotel.interface.ts";
+import type { IHotel } from "./hotel.interface.js";
 
 export interface IRoom {
   hotel: string | IHotel;

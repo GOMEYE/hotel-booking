@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { v2 as cloudinary } from "cloudinary";
-import Hotel from "../models/Hotel.ts";
-import Room from "../models/Room.ts";
+import Hotel from "../models/Hotel.js";
+import Room from "../models/Room.js";
 import { unlink } from "fs/promises";
 import { getAuth } from "@clerk/express";
 

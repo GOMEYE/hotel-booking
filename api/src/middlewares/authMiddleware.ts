@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import User from "../models/User.ts";
+import User from "../models/User.js";
 import { getAuth } from "@clerk/express";
 
 export const protect = async (

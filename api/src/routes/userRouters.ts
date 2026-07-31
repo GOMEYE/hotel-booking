@@ -1,9 +1,9 @@
 import express from "express";
-import { protect } from "../middlewares/authMiddleware.ts";
+import { protect } from "../middlewares/authMiddleware.js";
 import {
   getUserData,
   storeRecentSearcedCities,
-} from "../controllers/userController.ts";
+} from "../controllers/userController.js";
 
 const userRouter = express.Router();
 
